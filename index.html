@@ -3,266 +3,458 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Join & Win $10 Instantly!</title>
+  <title>User Panel Dashboard</title>
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #fff9e6;
-      color: #000;
-      margin: 0;
-      padding: 0;
+      font-family: 'Inter', sans-serif;
+      transition: background-color 0.3s, color 0.3s;
     }
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    .dark {
+      background-color: #1f2937;
+      color: #f9fafb;
     }
-    .header {
-      text-align: center;
-      padding: 10px;
-      background-color: #fcd535;
-      color: #000;
-      font-weight: bold;
-      font-size: 1.4rem;
-      border-radius: 8px;
-      margin-bottom: 20px;
+    .light {
+      background-color: #f9fafb;
+      color: #1f2937;
     }
-    .lottery-box {
-      text-align: center;
+    .sidebar {
+      transition: transform 0.3s ease-in-out;
     }
-    .lottery-box .icon {
-      width: 100px;
-      height: 100px;
-      margin: 20px auto;
-      background-image: linear-gradient(45deg, #fcd535, #000);
-      border: 3px solid #000;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      font-weight: bold;
-      color: #fff;
+    .sidebar-hidden {
+      transform: translateX(-100%);
     }
-    .price {
-      font-size: 1.5rem;
-      color: #000;
-      margin-bottom: 5px;
+    .card {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease-in-out;
     }
-    .old-price {
-      text-decoration: line-through;
-      color: gray;
+    .card:hover {
+      transform: translateY(-4px);
     }
-    .info {
-      font-size: 0.9rem;
-      margin: 10px 0;
+    .rounded-2xl {
+      border-radius: 1rem;
     }
-    .button {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      background-color: #fcd535;
-      color: #000;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      text-align: center;
-      text-decoration: none;
-    }
-    .form {
-      margin-top: 20px;
-    }
-    .form input[type="text"], .form input[type="file"] {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-
-    /* Success Modal Style */
-    .success-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(0, 0, 0, 0.6);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-    .success-box {
-      background-color: white;
-      padding: 25px;
-      border-radius: 16px;
-      text-align: center;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-    }
-    .success-box h2 {
-      color: green;
-      margin-bottom: 10px;
-    }
-    .success-box #countdownTimer {
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    .success-box .back-button {
-      margin-top: 12px;
-      padding: 10px 20px;
-      background-color: #fcd535;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .note {
-      display: none;
-      text-align: left;
-      padding: 10px;
-      background-color: #fcd535;
-      border-radius: 8px;
-      margin-top: 10px;
-      color: #000;
-      font-weight: bold;
-    }
-    .note .pin {
-      float: right;
-      font-size: 18px;
+    /* Chart.js styling for the earnings chart */
+    canvas {
+      max-width: 100%;
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <div class="header">Only $0.5 to Win $10 Instantly!</div>
-    <div class="lottery-box">
-      <div class="icon">$10</div>
-      <div class="price">$0.5 <span class="old-price">$5</span></div>
-      <div class="info">Prize for Top 5 Winners!</div>
-      <div class="info">Current Participants: <span id="participantCount">3</span></div>
-      <div class="info">Winner Announcement: <span id="countdown"></span></div>
+<body class="light min-h-screen">
+  <!-- Navbar -->
+  <nav class="flex items-center justify-between p-4 border-b bg-white dark:bg-gray-800 shadow-sm">
+    <div class="text-lg font-bold">IncomeSite</div>
+    <div class="flex items-center space-x-4">
+      <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+        <i data-lucide="sun" class="w-5 h-5"></i>
+      </button>
+      <div class="relative">
+        <button id="profile-toggle" class="flex items-center space-x-2">
+          <img src="https://via.placeholder.com/32" alt="User" class="w-8 h-8 rounded-full">
+          <span>User Name</span>
+        </button>
+        <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border rounded-2xl shadow-lg hidden">
+          <div class="p-4">
+            <p class="font-medium">User Name</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">user@email.com</p>
+          </div>
+          <hr class="border-gray-200 dark:border-gray-700">
+          <button class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">Profile</button>
+          <button class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">Settings</button>
+          <button class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+            <i data-lucide="log-out" class="w-4 h-4 mr-2"></i> Log Out
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="note" id="binanceNote">
-      <div>নোট ১: Binance App-এ নিয়ে যাওয়া হচ্ছে, অনুগ্রহ করে একটু অপেক্ষা করুন...</div>
-      <div style="margin-top:8px;">নোট ২ <span class="pin">📌</span>: পেমেন্ট করার পর নিচের ফর্মে আপনার নাম, টেলিগ্রাম ইউজারনেম, Binance Pay ID এবং স্ক্রিনশর্ট জমা দিন।</div>
-    </div>
-    <button class="button" id="binanceBtn">Pay $0.5 via Binance</button>
+  </nav>
 
-    <form class="form" id="lotteryForm">
-      <input type="text" name="name" placeholder="Your Name" required>
-      <input type="text" name="telegram" placeholder="Telegram Username" required>
-      <input type="text" name="payid" placeholder="Binance Pay ID" required>
-      <input type="file" name="screenshot" id="screenshot" accept="image/*" required>
-      <button type="submit" class="button">Submit & Join Lottery</button>
-    </form>
+  <!-- Main Layout -->
+  <div class="flex h-[calc(100vh-64px)]">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 bg-white dark:bg-gray-800 border-r p-4 sidebar md:block hidden">
+      <nav class="flex flex-col space-y-2">
+        <button onclick="showPage('dashboard')" class="flex items-center space-x-2 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <span>Dashboard</span>
+        </button>
+        <button onclick="showPage('tasks')" class="flex items-center space-x-2 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          <span>Tasks/Offers</span>
+        </button>
+        <button onclick="showPage('referral')" class="flex items-center space-x-2 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          <span>Referral</span>
+        </button>
+        <button onclick="showPage('wallet')" class="flex items-center space-x-2 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
+          <i data-lucide="wallet" class="w-4 h-4"></i>
+          <span>Wallet</span>
+        </button>
+        <button onclick="showPage('withdraw')" class="flex items-center space-x-2 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
+          <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+          <span>Withdraw</span>
+        </button>
+        <button onclick="showPage('support')" class="flex items-center space-x-2 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
+          <i data-lucide="help-circle" class="w-4 h-4"></i>
+          <span>Support</span>
+        </button>
+        <button onclick="showPage('settings')" class="flex items-center space-x-2 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+          <span>Settings</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Mobile Sidebar Toggle -->
+    <button id="sidebar-toggle" class="md:hidden fixed top-4 left-4 p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+      <i data-lucide="menu" class="w-5 h-5"></i>
+    </button>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 overflow-y-auto">
+      <!-- Dashboard Page -->
+      <section id="dashboard" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
+            <h3 class="text-lg font-semibold">Total Earnings</h3>
+            <p class="text-2xl font-bold">$1,250.00</p>
+          </div>
+          <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
+            <h3 class="text-lg font-semibold">Current Balance</h3>
+            <p class="text-2xl font-bold">$450.00</p>
+          </div>
+          <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
+            <h3 class="text-lg font-semibold">Completed Tasks</h3>
+            <p class="text-2xl font-bold">42</p>
+          </div>
+        </div>
+        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
+          <h3 class="text-lg font-semibold">Daily Earnings Trend</h3>
+          <canvas id="earnings-chart"></canvas>
+        </div>
+      </section>
+
+      <!-- Tasks Page -->
+      <section id="tasks" class="space-y-6 hidden">
+        <h2 class="text-2xl font-bold">Tasks/Offers</h2>
+        <div id="task-list" class="grid grid-cols-1 gap-4">
+          <!-- Tasks will be populated by JavaScript -->
+        </div>
+      </section>
+
+      <!-- Referral Page -->
+      <section id="referral" class="space-y-6 hidden">
+        <h2 class="text-2xl font-bold">Referral</h2>
+        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
+          <h3 class="text-lg font-semibold">Your Referral Link</h3>
+          <div class="flex items-center space-x-2">
+            <input type="text" value="https://incomesite.com/ref/12345" readonly class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700">
+            <button onclick="copyReferralLink()" class="p-2 bg-blue-500 text-white rounded-2xl">Copy</button>
+          </div>
+        </div>
+        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
+          <h3 class="text-lg font-semibold">Referred Users</h3>
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b">
+                <th class="p-2">User</th>
+                <th class="p-2">Commission</th>
+              </tr>
+            </thead>
+            <tbody id="referral-table">
+              <!-- Table rows populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Wallet Page -->
+      <section id="wallet" class="space-y-6 hidden">
+        <h2 class="text-2xl font-bold">Wallet</h2>
+        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
+          <h3 class="text-lg font-semibold">Transaction History</h3>
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b">
+                <th class="p-2">Date</th>
+                <th class="p-2">Type</th>
+                <th class="p-2">Amount</th>
+                <th class="p-2">Status</th>
+              </tr>
+            </thead>
+            <tbody id="transaction-table">
+              <!-- Table rows populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Withdraw Page -->
+      <section id="withdraw" class="space-y-6 hidden">
+        <h2 class="text-2xl font-bold">Withdraw</h2>
+        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
+          <h3 class="text-lg font-semibold">Withdraw Funds</h3>
+          <form>
+            <div class="mb-4">
+              <label class="block text-sm font-medium">Withdraw Method</label>
+              <select class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700">
+                <option>bKash</option>
+                <option>Nagad</option>
+                <option>Bank</option>
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium">Amount</label>
+              <input type="number" class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700" placeholder="Minimum $10">
+            </div>
+            <button type="submit" class="p-2 bg-blue-500 text-white rounded-2xl">Request Withdrawal</button>
+          </form>
+          <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Minimum Withdraw Limit: $10</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Status: Pending</p>
+        </div>
+      </section>
+
+      <!-- Support Page -->
+      <section id="support" class="space-y-6 hidden">
+        <h2 class="text-2xl font-bold">Support</h2>
+        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
+          <h3 class="text-lg font-semibold">Submit a Ticket</h3>
+          <form>
+            <div class="mb-4">
+              <label class="block text-sm font-medium">Title</label>
+              <input type="text" class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700" placeholder="Issue title">
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium">Description</label>
+              <textarea class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700" rows="4" placeholder="Describe your issue"></textarea>
+            </div>
+            <button type="submit" class="p-2 bg-blue-500 text-white rounded-2xl">Submit Ticket</button>
+          </form>
+        </div>
+        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
+          <h3 class="text-lg font-semibold">Ticket History</h3>
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b">
+                <th class="p-2">Title</th>
+                <th class="p-2">Status</th>
+              </tr>
+            </thead>
+            <tbody id="ticket-table">
+              <!-- Table rows populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Settings Page -->
+      <section id="settings" class="space-y-6 hidden">
+        <h2 class="text-2xl font-bold">Settings</h2>
+        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
+          <h3 class="text-lg font-semibold">Update Profile</h3>
+          <form>
+            <div class="mb-4">
+              <label class="block text-sm font-medium">Name</label>
+              <input type="text" class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700" placeholder="Your name">
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium">Email</label>
+              <input type="email" class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700" placeholder="Your email">
+            </div>
+            <button type="submit" class="p-2 bg-blue-500 text-white rounded-2xl">Save</button>
+          </form>
+        </div>
+        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
+          <h3 class="text-lg font-semibold">Change Password</h3>
+          <form>
+            <div class="mb-4">
+              <label class="block text-sm font-medium">Current Password</label>
+              <input type="password" class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700" placeholder="Current password">
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium">New Password</label>
+              <input type="password" class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700" placeholder="New password">
+            </div>
+            <button type="submit" class="p-2 bg-blue-500 text-white rounded-2xl">Change Password</button>
+          </form>
+        </div>
+        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
+          <h3 class="text-lg font-semibold">Notification Preferences</h3>
+          <form>
+            <div class="mb-4">
+              <label class="flex items-center space-x-2">
+                <input type="checkbox" class="h-4 w-4">
+                <span>Email Notifications</span>
+              </label>
+            </div>
+            <div class="mb-4">
+              <label class="flex items-center space-x-2">
+                <input type="checkbox" class="h-4 w-4">
+                <span>Push Notifications</span>
+              </label>
+            </div>
+            <button type="submit" class="p-2 bg-blue-500 text-white rounded-2xl">Save</button>
+          </form>
+        </div>
+      </section>
+    </main>
   </div>
 
-  <!-- Modal -->
-  <div class="success-modal" id="successModal">
-    <div class="success-box">
-      <h2>আপনি সফলভাবে লটারিতে জয়েন করেছেন!</h2>
-      <div>ড্র অনুষ্ঠিত হবে:</div>
-      <div id="countdownTimer"></div>
-      <button class="back-button" id="backButton">লটারি পেইজে ফিরে যান</button>
-    </div>
-  </div>
-
+  <!-- Chart.js CDN for Earnings Chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    let initialCount = 3;
-    const startTime = new Date();
-    function updateParticipantCount() {
-      const now = new Date();
-      const hoursPassed = Math.floor((now - startTime) / (1000 * 60 * 60));
-      const newCount = initialCount + Math.floor(hoursPassed / 12);
-      document.getElementById("participantCount").innerText = newCount;
-    }
-    setInterval(updateParticipantCount, 1000);
-    updateParticipantCount();
+    // Initialize Lucide Icons
+    lucide.createIcons();
 
-    const countdownEl = document.getElementById("countdown");
-    const targetDate = new Date();
-    targetDate.setDate(targetDate.getDate() + 10);
-    targetDate.setHours(targetDate.getHours() + 14);
-
-    function updateCountdown() {
-      const now = new Date();
-      const diff = targetDate - now;
-      if (diff <= 0) {
-        countdownEl.innerText = "Winner Announced!";
-        return "Winner Announced!";
+    // Theme Toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      document.body.classList.toggle('light');
+      const icon = themeToggle.querySelector('i');
+      if (document.body.classList.contains('dark')) {
+        icon.setAttribute('data-lucide', 'moon');
+      } else {
+        icon.setAttribute('data-lucide', 'sun');
       }
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((diff / (1000 * 60)) % 60);
-      const seconds = Math.floor((diff / 1000) % 60);
-      const formatted = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-      countdownEl.innerText = formatted;
-      return formatted;
-    }
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
+      lucide.createIcons();
+    });
 
-    document.getElementById('lotteryForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const form = document.getElementById('lotteryForm');
-      const name = form.name.value;
-      const telegram = form.telegram.value;
-      const payid = form.payid.value;
-      const screenshot = document.getElementById('screenshot').files[0];
+    // Profile Dropdown
+    const profileToggle = document.getElementById('profile-toggle');
+    const profileDropdown = document.getElementById('profile-dropdown');
+    profileToggle.addEventListener('click', () => {
+      profileDropdown.classList.toggle('hidden');
+    });
 
-      const caption = `New Lottery Entry\nName: ${name}\nTelegram: @${telegram}\nPay ID: ${payid}`;
-      const botToken = '8112295887:AAHTaXjICjJs1cXtxMGfuez_kR24O9wyI7I';
-      const chatId = '7523730461';
+    // Sidebar Toggle (Mobile)
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.getElementById('sidebar');
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('sidebar-hidden');
+    });
 
-      const formData = new FormData();
-      formData.append('chat_id', chatId);
-      formData.append('caption', caption);
-      formData.append('document', screenshot);
-
-      fetch(`https://api.telegram.org/bot${botToken}/sendDocument`, {
-        method: 'POST',
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.ok) {
-          const modal = document.getElementById('successModal');
-          modal.style.display = 'flex';
-
-          // Start live countdown inside modal
-          setInterval(() => {
-            document.getElementById('countdownTimer').innerText = updateCountdown();
-          }, 1000);
-        } else {
-          alert("Something went wrong: " + data.description);
-        }
-      })
-      .catch(error => {
-        alert('Error sending data to Telegram.');
-        console.error(error);
+    // Page Navigation
+    function showPage(pageId) {
+      document.querySelectorAll('main section').forEach(section => {
+        section.classList.add('hidden');
       });
+      document.getElementById(pageId).classList.remove('hidden');
+      if (window.innerWidth < 768) {
+        sidebar.classList.add('sidebar-hidden');
+      }
+    }
+
+    // Mock Data for Tasks
+    const tasks = [
+      { id: 1, title: 'Complete Survey', reward: '$5.00' },
+      { id: 2, title: 'Watch Ad Video', reward: '$2.50' },
+      { id: 3, title: 'App Install', reward: '$10.00' },
+    ];
+
+    // Populate Task List
+    const taskList = document.getElementById('task-list');
+    tasks.forEach(task => {
+      taskList.innerHTML += `
+        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl flex justify-between items-center">
+          <div>
+            <h3 class="text-lg font-semibold">${task.title}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Reward: ${task.reward}</p>
+          </div>
+          <button class="p-2 bg-blue-500 text-white rounded-2xl">Start Task</button>
+        </div>
+      `;
     });
 
-    document.getElementById('binanceBtn').addEventListener('click', function () {
-      const note = document.getElementById('binanceNote');
-      note.style.display = 'block';
-      setTimeout(() => {
-        window.location.href = 'https://s.binance.com/wdMhflbY';
-      }, 5000);
+    // Mock Data for Referral Table
+    const referrals = [
+      { user: 'friend1@email.com', commission: '$10.00' },
+      { user: 'friend2@email.com', commission: '$5.00' },
+    ];
+
+    // Populate Referral Table
+    const referralTable = document.getElementById('referral-table');
+    referrals.forEach(referral => {
+      referralTable.innerHTML += `
+        <tr>
+          <td class="p-2">${referral.user}</td>
+          <td class="p-2">${referral.commission}</td>
+        </tr>
+      `;
     });
 
-    document.getElementById('backButton').addEventListener('click', function() {
-      location.reload(); // This will refresh the page immediately
+    // Mock Data for Transaction Table
+    const transactions = [
+      { date: '2025-10-01', type: 'Deposit', amount: '$50.00', status: 'Completed' },
+      { date: '2025-10-02', type: 'Withdrawal', amount: '$20.00', status: 'Pending' },
+    ];
+
+    // Populate Transaction Table
+    const transactionTable = document.getElementById('transaction-table');
+    transactions.forEach(transaction => {
+      transactionTable.innerHTML += `
+        <tr>
+          <td class="p-2">${transaction.date}</td>
+          <td class="p-2">${transaction.type}</td>
+          <td class="p-2">${transaction.amount}</td>
+          <td class="p-2">${transaction.status}</td>
+        </tr>
+      `;
     });
+
+    // Mock Data for Ticket Table
+    const tickets = [
+      { title: 'Payment Issue', status: 'Open' },
+      { title: 'Account Verification', status: 'Closed' },
+    ];
+
+    // Populate Ticket Table
+    const ticketTable = document.getElementById('ticket-table');
+    tickets.forEach(ticket => {
+      ticketTable.innerHTML += `
+        <tr>
+          <td class="p-2">${ticket.title}</td>
+          <td class="p-2">${ticket.status}</td>
+        </tr>
+      `;
+    });
+
+    // Copy Referral Link
+    function copyReferralLink() {
+      const link = document.querySelector('#referral input').value;
+      navigator.clipboard.writeText(link);
+      alert('Referral link copied!');
+    }
+
+    // Earnings Chart
+    const ctx = document.getElementById('earnings-chart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Oct 1', 'Oct 2', 'Oct 3', 'Oct 4', 'Oct 5'],
+        datasets: [{
+          label: 'Daily Earnings',
+          data: [10, 20, 15, 25, 30],
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.2)',
+          fill: true,
+        }],
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+
+    // Show Dashboard by Default
+    showPage('dashboard');
   </script>
 </body>
 </html>
-
