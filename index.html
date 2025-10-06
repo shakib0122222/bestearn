@@ -275,6 +275,11 @@
             margin-top: 20px;
             font-weight: 600;
             font-size: 1.1em;
+            opacity: 0; /* Initially hidden */
+            transition: opacity 0.5s ease-in-out;
+        }
+        #withdraw-message.show {
+            opacity: 1; /* Show when 'show' class is added */
         }
 
         /* Mobile Responsiveness */
@@ -410,7 +415,7 @@
     </div>
     <div class="main-content">
         <header>
-            <h1>Welcome, User!</h1>
+            <h1>Welcome, Shakib12!</h1> <!-- Updated username here -->
             <div class="user-info">
                 <p>Balance: $<span id="balance">1050.00</span></p>
             </div>
@@ -496,7 +501,7 @@
                     <input type="text" id="binance-payid" placeholder="Enter your Binance Pay ID">
                 </div>
                 <button id="withdraw-button">Withdraw Now</button>
-                <p id="withdraw-message" style="color: green;"></p>
+                <p id="withdraw-message" class="show" style="color: var(--success-color);"></p>
             </div>
         </section>
 
@@ -507,7 +512,6 @@
     </div>
 
     <script>
-        // JavaScript content remains the same
         document.addEventListener('DOMContentLoaded', () => {
             const sidebarLinks = document.querySelectorAll('.sidebar ul li a');
             const contentSections = document.querySelectorAll('.content-section');
@@ -550,37 +554,50 @@
             // Simulate withdraw functionality
             withdrawButton.addEventListener('click', () => {
                 const amount = parseFloat(withdrawAmountInput.value);
-                const currentBalance = parseFloat(balanceSpan.textContent);
+                let currentBalance = parseFloat(balanceSpan.textContent); // Use let to allow re-assignment
                 const paymentMethod = paymentMethodSelect.value;
                 const binancePayId = binancePayidInputField.value;
 
+                // Clear previous messages and hide
+                withdrawMessage.classList.remove('show');
                 withdrawMessage.textContent = '';
-                withdrawMessage.style.color = 'red';
+                withdrawMessage.style.color = 'var(--error-color)'; // Default to error color
 
                 if (isNaN(amount) || amount <= 0) {
                     withdrawMessage.textContent = 'Please enter a valid amount.';
+                    withdrawMessage.classList.add('show');
                     return;
                 }
 
                 if (amount > currentBalance) {
                     withdrawMessage.textContent = 'Insufficient balance.';
+                    withdrawMessage.classList.add('show');
                     return;
                 }
 
                 if (paymentMethod === 'binance' && binancePayId.trim() === '') {
                     withdrawMessage.textContent = 'Please enter your Binance Pay ID.';
+                    withdrawMessage.classList.add('show');
                     return;
                 }
 
                 // Simulate a successful withdrawal
-                const newBalance = currentBalance - amount;
-                balanceSpan.textContent = newBalance.toFixed(2); // Update balance display
+                currentBalance = currentBalance - amount; // Update balance
+                balanceSpan.textContent = currentBalance.toFixed(2); // Update balance display
+
                 withdrawMessage.style.color = 'var(--success-color)';
-                withdrawMessage.textContent = `Successfully withdrew $${amount.toFixed(2)} via ${paymentMethod === 'binance' ? 'Binance Pay ID' : paymentMethod}.`;
+                withdrawMessage.textContent = `Successfully withdrew $${amount.toFixed(2)} via ${paymentMethod === 'binance' ? 'Binance Pay ID' : paymentMethod}. Please wait up to 24 hours for processing.`;
+                withdrawMessage.classList.add('show');
 
                 // Clear input fields
                 withdrawAmountInput.value = '';
                 binancePayidInputField.value = '';
+
+                // Hide the message after 5 seconds
+                setTimeout(() => {
+                    withdrawMessage.classList.remove('show');
+                    withdrawMessage.textContent = ''; // Clear text after hiding
+                }, 5000); // 5000 milliseconds = 5 seconds
 
                 // In a real application, this would send data to a server for processing.
                 console.log(`Withdrawal Request: Amount - $${amount}, Method - ${paymentMethod}, Binance Pay ID - ${binancePayId}`);
