@@ -1,460 +1,355 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Panel Dashboard</title>
-  <!-- TailwindCSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      transition: background-color 0.3s, color 0.3s;
-    }
-    .dark {
-      background-color: #1f2937;
-      color: #f9fafb;
-    }
-    .light {
-      background-color: #f9fafb;
-      color: #1f2937;
-    }
-    .sidebar {
-      transition: transform 0.3s ease-in-out;
-    }
-    .sidebar-hidden {
-      transform: translateX(-100%);
-    }
-    .card {
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease-in-out;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-    }
-    .rounded-2xl {
-      border-radius: 1rem;
-    }
-    /* Chart.js styling for the earnings chart */
-    canvas {
-      max-width: 100%;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Income Dashboard</title>
+    <style>
+        /* style.css content goes here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            background-color: #f4f7f6;
+            color: #333; /* Default text color */
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ecf0f1;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar ul li a:hover,
+        .sidebar ul li a.active {
+            background-color: #34495e;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        header h1 {
+            margin: 0;
+            color: #333;
+        }
+
+        .user-info p {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .content-section {
+            display: none;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .content-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .card {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        .card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .card ul li {
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+
+        .withdraw-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .withdraw-form input[type="number"],
+        .withdraw-form input[type="text"],
+        .withdraw-form select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .withdraw-form button {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .withdraw-form button:hover {
+            background-color: #218838;
+        }
+
+        #withdraw-message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
 </head>
-<body class="light min-h-screen">
-  <!-- Navbar -->
-  <nav class="flex items-center justify-between p-4 border-b bg-white dark:bg-gray-800 shadow-sm">
-    <div class="text-lg font-bold">IncomeSite</div>
-    <div class="flex items-center space-x-4">
-      <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-        <i data-lucide="sun" class="w-5 h-5"></i>
-      </button>
-      <div class="relative">
-        <button id="profile-toggle" class="flex items-center space-x-2">
-          <img src="https://via.placeholder.com/32" alt="User" class="w-8 h-8 rounded-full">
-          <span>User Name</span>
-        </button>
-        <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border rounded-2xl shadow-lg hidden">
-          <div class="p-4">
-            <p class="font-medium">User Name</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">user@email.com</p>
-          </div>
-          <hr class="border-gray-200 dark:border-gray-700">
-          <button class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">Profile</button>
-          <button class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">Settings</button>
-          <button class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
-            <i data-lucide="log-out" class="w-4 h-4 mr-2"></i> Log Out
-          </button>
-        </div>
-      </div>
+<body>
+    <div class="sidebar">
+        <h2>Dashboard</h2>
+        <ul>
+            <li><a href="#" class="active" data-section="overview">Overview</a></li>
+            <li><a href="#" data-section="earnings">Earnings</a></li>
+            <li><a href="#" data-section="withdraw">Withdraw</a></li>
+            <li><a href="#" data-section="settings">Settings</a></li>
+        </ul>
     </div>
-  </nav>
-
-  <!-- Main Layout -->
-  <div class="flex h-[calc(100vh-64px)]">
-    <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 bg-white dark:bg-gray-800 border-r p-4 sidebar md:block hidden">
-      <nav class="flex flex-col space-y-2">
-        <button onclick="showPage('dashboard')" class="flex items-center space-x-2 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
-          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-          <span>Dashboard</span>
-        </button>
-        <button onclick="showPage('tasks')" class="flex items-center space-x-2 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
-          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
-          <span>Tasks/Offers</span>
-        </button>
-        <button onclick="showPage('referral')" class="flex items-center space-x-2 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
-          <i data-lucide="link" class="w-4 h-4"></i>
-          <span>Referral</span>
-        </button>
-        <button onclick="showPage('wallet')" class="flex items-center space-x-2 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
-          <i data-lucide="wallet" class="w-4 h-4"></i>
-          <span>Wallet</span>
-        </button>
-        <button onclick="showPage('withdraw')" class="flex items-center space-x-2 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
-          <i data-lucide="dollar-sign" class="w-4 h-4"></i>
-          <span>Withdraw</span>
-        </button>
-        <button onclick="showPage('support')" class="flex items-center space-x-2 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
-          <i data-lucide="help-circle" class="w-4 h-4"></i>
-          <span>Support</span>
-        </button>
-        <button onclick="showPage('settings')" class="flex items-center space-x-2 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
-          <i data-lucide="settings" class="w-4 h-4"></i>
-          <span>Settings</span>
-        </button>
-      </nav>
-    </aside>
-
-    <!-- Mobile Sidebar Toggle -->
-    <button id="sidebar-toggle" class="md:hidden fixed top-4 left-4 p-2 rounded-full bg-gray-200 dark:bg-gray-700">
-      <i data-lucide="menu" class="w-5 h-5"></i>
-    </button>
-
-    <!-- Main Content -->
-    <main class="flex-1 p-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 overflow-y-auto">
-      <!-- Dashboard Page -->
-      <section id="dashboard" class="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
-            <h3 class="text-lg font-semibold">Total Earnings</h3>
-            <p class="text-2xl font-bold">$1,250.00</p>
-          </div>
-          <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
-            <h3 class="text-lg font-semibold">Current Balance</h3>
-            <p class="text-2xl font-bold">$450.00</p>
-          </div>
-          <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
-            <h3 class="text-lg font-semibold">Completed Tasks</h3>
-            <p class="text-2xl font-bold">42</p>
-          </div>
-        </div>
-        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
-          <h3 class="text-lg font-semibold">Daily Earnings Trend</h3>
-          <canvas id="earnings-chart"></canvas>
-        </div>
-      </section>
-
-      <!-- Tasks Page -->
-      <section id="tasks" class="space-y-6 hidden">
-        <h2 class="text-2xl font-bold">Tasks/Offers</h2>
-        <div id="task-list" class="grid grid-cols-1 gap-4">
-          <!-- Tasks will be populated by JavaScript -->
-        </div>
-      </section>
-
-      <!-- Referral Page -->
-      <section id="referral" class="space-y-6 hidden">
-        <h2 class="text-2xl font-bold">Referral</h2>
-        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
-          <h3 class="text-lg font-semibold">Your Referral Link</h3>
-          <div class="flex items-center space-x-2">
-            <input type="text" value="https://incomesite.com/ref/12345" readonly class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700">
-            <button onclick="copyReferralLink()" class="p-2 bg-blue-500 text-white rounded-2xl">Copy</button>
-          </div>
-        </div>
-        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
-          <h3 class="text-lg font-semibold">Referred Users</h3>
-          <table class="w-full text-left">
-            <thead>
-              <tr class="border-b">
-                <th class="p-2">User</th>
-                <th class="p-2">Commission</th>
-              </tr>
-            </thead>
-            <tbody id="referral-table">
-              <!-- Table rows populated by JavaScript -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Wallet Page -->
-      <section id="wallet" class="space-y-6 hidden">
-        <h2 class="text-2xl font-bold">Wallet</h2>
-        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
-          <h3 class="text-lg font-semibold">Transaction History</h3>
-          <table class="w-full text-left">
-            <thead>
-              <tr class="border-b">
-                <th class="p-2">Date</th>
-                <th class="p-2">Type</th>
-                <th class="p-2">Amount</th>
-                <th class="p-2">Status</th>
-              </tr>
-            </thead>
-            <tbody id="transaction-table">
-              <!-- Table rows populated by JavaScript -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Withdraw Page -->
-      <section id="withdraw" class="space-y-6 hidden">
-        <h2 class="text-2xl font-bold">Withdraw</h2>
-        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
-          <h3 class="text-lg font-semibold">Withdraw Funds</h3>
-          <form>
-            <div class="mb-4">
-              <label class="block text-sm font-medium">Withdraw Method</label>
-              <select class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700">
-                <option>bKash</option>
-                <option>Nagad</option>
-                <option>Bank</option>
-              </select>
+    <div class="main-content">
+        <header>
+            <h1>Welcome, User!</h1>
+            <div class="user-info">
+                <p>Balance: $<span id="balance">1050.00</span></p>
             </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium">Amount</label>
-              <input type="number" class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700" placeholder="Minimum $10">
+        </header>
+
+        <section id="overview" class="content-section active">
+            <h2>Overview</h2>
+            <div class="card">
+                <h3>Total Earnings</h3>
+                <p>$<span id="total-earnings">1200.00</span></p>
             </div>
-            <button type="submit" class="p-2 bg-blue-500 text-white rounded-2xl">Request Withdrawal</button>
-          </form>
-          <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Minimum Withdraw Limit: $10</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">Status: Pending</p>
-        </div>
-      </section>
-
-      <!-- Support Page -->
-      <section id="support" class="space-y-6 hidden">
-        <h2 class="text-2xl font-bold">Support</h2>
-        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
-          <h3 class="text-lg font-semibold">Submit a Ticket</h3>
-          <form>
-            <div class="mb-4">
-              <label class="block text-sm font-medium">Title</label>
-              <input type="text" class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700" placeholder="Issue title">
+            <div class="card">
+                <h3>Pending Balance</h3>
+                <p>$<span id="pending-balance">50.00</span></p>
             </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium">Description</label>
-              <textarea class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700" rows="4" placeholder="Describe your issue"></textarea>
+            <div class="card">
+                <h3>Recent Activity</h3>
+                <ul>
+                    <li>Earned $10.00 - Task XYZ</li>
+                    <li>Withdrawal $200.00 - Pending</li>
+                    <li>Earned $5.00 - Survey ABC</li>
+                </ul>
             </div>
-            <button type="submit" class="p-2 bg-blue-500 text-white rounded-2xl">Submit Ticket</button>
-          </form>
-        </div>
-        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
-          <h3 class="text-lg font-semibold">Ticket History</h3>
-          <table class="w-full text-left">
-            <thead>
-              <tr class="border-b">
-                <th class="p-2">Title</th>
-                <th class="p-2">Status</th>
-              </tr>
-            </thead>
-            <tbody id="ticket-table">
-              <!-- Table rows populated by JavaScript -->
-            </tbody>
-          </table>
-        </div>
-      </section>
+        </section>
 
-      <!-- Settings Page -->
-      <section id="settings" class="space-y-6 hidden">
-        <h2 class="text-2xl font-bold">Settings</h2>
-        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
-          <h3 class="text-lg font-semibold">Update Profile</h3>
-          <form>
-            <div class="mb-4">
-              <label class="block text-sm font-medium">Name</label>
-              <input type="text" class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700" placeholder="Your name">
+        <section id="earnings" class="content-section">
+            <h2>My Earnings</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2023-10-26</td>
+                        <td>Task Completion</td>
+                        <td>$15.00</td>
+                    </tr>
+                    <tr>
+                        <td>2023-10-25</td>
+                        <td>Referral Bonus</td>
+                        <td>$25.00</td>
+                    </tr>
+                    <tr>
+                        <td>2023-10-24</td>
+                        <td>Survey Reward</td>
+                        <td>$10.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="withdraw" class="content-section">
+            <h2>Withdraw Funds</h2>
+            <div class="withdraw-form">
+                <label for="withdraw-amount">Amount to Withdraw:</label>
+                <input type="number" id="withdraw-amount" min="10" placeholder="Minimum $10">
+                <label for="payment-method">Payment Method:</label>
+                <select id="payment-method">
+                    <option value="bank">Bank Transfer</option>
+                    <option value="binance">Binance Pay ID</option>
+                    <option value="paypal">PayPal</option>
+                </select>
+                <div id="binance-payid-input" style="display: none;">
+                    <label for="binance-payid">Binance Pay ID:</label>
+                    <input type="text" id="binance-payid" placeholder="Enter your Binance Pay ID">
+                </div>
+                <button id="withdraw-button">Withdraw Now</button>
+                <p id="withdraw-message" style="color: green;"></p>
             </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium">Email</label>
-              <input type="email" class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700" placeholder="Your email">
-            </div>
-            <button type="submit" class="p-2 bg-blue-500 text-white rounded-2xl">Save</button>
-          </form>
-        </div>
-        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
-          <h3 class="text-lg font-semibold">Change Password</h3>
-          <form>
-            <div class="mb-4">
-              <label class="block text-sm font-medium">Current Password</label>
-              <input type="password" class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700" placeholder="Current password">
-            </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium">New Password</label>
-              <input type="password" class="w-full p-2 border rounded-2xl bg-gray-100 dark:bg-gray-700" placeholder="New password">
-            </div>
-            <button type="submit" class="p-2 bg-blue-500 text-white rounded-2xl">Change Password</button>
-          </form>
-        </div>
-        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl">
-          <h3 class="text-lg font-semibold">Notification Preferences</h3>
-          <form>
-            <div class="mb-4">
-              <label class="flex items-center space-x-2">
-                <input type="checkbox" class="h-4 w-4">
-                <span>Email Notifications</span>
-              </label>
-            </div>
-            <div class="mb-4">
-              <label class="flex items-center space-x-2">
-                <input type="checkbox" class="h-4 w-4">
-                <span>Push Notifications</span>
-              </label>
-            </div>
-            <button type="submit" class="p-2 bg-blue-500 text-white rounded-2xl">Save</button>
-          </form>
-        </div>
-      </section>
-    </main>
-  </div>
+        </section>
 
-  <!-- Chart.js CDN for Earnings Chart -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    // Initialize Lucide Icons
-    lucide.createIcons();
+        <section id="settings" class="content-section">
+            <h2>Settings</h2>
+            <p>Account settings will go here.</p>
+        </section>
+    </div>
 
-    // Theme Toggle
-    const themeToggle = document.getElementById('theme-toggle');
-    themeToggle.addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-      document.body.classList.toggle('light');
-      const icon = themeToggle.querySelector('i');
-      if (document.body.classList.contains('dark')) {
-        icon.setAttribute('data-lucide', 'moon');
-      } else {
-        icon.setAttribute('data-lucide', 'sun');
-      }
-      lucide.createIcons();
-    });
+    <script>
+        // script.js content goes here
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarLinks = document.querySelectorAll('.sidebar ul li a');
+            const contentSections = document.querySelectorAll('.content-section');
+            const paymentMethodSelect = document.getElementById('payment-method');
+            const binancePayidInputDiv = document.getElementById('binance-payid-input');
+            const withdrawButton = document.getElementById('withdraw-button');
+            const withdrawAmountInput = document.getElementById('withdraw-amount');
+            const binancePayidInputField = document.getElementById('binance-payid');
+            const withdrawMessage = document.getElementById('withdraw-message');
+            const balanceSpan = document.getElementById('balance');
 
-    // Profile Dropdown
-    const profileToggle = document.getElementById('profile-toggle');
-    const profileDropdown = document.getElementById('profile-dropdown');
-    profileToggle.addEventListener('click', () => {
-      profileDropdown.classList.toggle('hidden');
-    });
+            // Handle sidebar navigation
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
 
-    // Sidebar Toggle (Mobile)
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const sidebar = document.getElementById('sidebar');
-    sidebarToggle.addEventListener('click', () => {
-      sidebar.classList.toggle('sidebar-hidden');
-    });
+                    // Remove active class from all links
+                    sidebarLinks.forEach(item => item.classList.remove('active'));
+                    // Add active class to the clicked link
+                    link.classList.add('active');
 
-    // Page Navigation
-    function showPage(pageId) {
-      document.querySelectorAll('main section').forEach(section => {
-        section.classList.add('hidden');
-      });
-      document.getElementById(pageId).classList.remove('hidden');
-      if (window.innerWidth < 768) {
-        sidebar.classList.add('sidebar-hidden');
-      }
-    }
+                    // Hide all content sections
+                    contentSections.forEach(section => section.classList.remove('active'));
 
-    // Mock Data for Tasks
-    const tasks = [
-      { id: 1, title: 'Complete Survey', reward: '$5.00' },
-      { id: 2, title: 'Watch Ad Video', reward: '$2.50' },
-      { id: 3, title: 'App Install', reward: '$10.00' },
-    ];
+                    // Show the corresponding content section
+                    const targetSectionId = link.dataset.section;
+                    document.getElementById(targetSectionId).classList.add('active');
+                });
+            });
 
-    // Populate Task List
-    const taskList = document.getElementById('task-list');
-    tasks.forEach(task => {
-      taskList.innerHTML += `
-        <div class="card bg-white dark:bg-gray-800 p-6 rounded-2xl flex justify-between items-center">
-          <div>
-            <h3 class="text-lg font-semibold">${task.title}</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Reward: ${task.reward}</p>
-          </div>
-          <button class="p-2 bg-blue-500 text-white rounded-2xl">Start Task</button>
-        </div>
-      `;
-    });
+            // Handle payment method change for withdraw section
+            paymentMethodSelect.addEventListener('change', () => {
+                if (paymentMethodSelect.value === 'binance') {
+                    binancePayidInputDiv.style.display = 'block';
+                } else {
+                    binancePayidInputDiv.style.display = 'none';
+                }
+            });
 
-    // Mock Data for Referral Table
-    const referrals = [
-      { user: 'friend1@email.com', commission: '$10.00' },
-      { user: 'friend2@email.com', commission: '$5.00' },
-    ];
+            // Simulate withdraw functionality
+            withdrawButton.addEventListener('click', () => {
+                const amount = parseFloat(withdrawAmountInput.value);
+                const currentBalance = parseFloat(balanceSpan.textContent);
+                const paymentMethod = paymentMethodSelect.value;
+                const binancePayId = binancePayidInputField.value;
 
-    // Populate Referral Table
-    const referralTable = document.getElementById('referral-table');
-    referrals.forEach(referral => {
-      referralTable.innerHTML += `
-        <tr>
-          <td class="p-2">${referral.user}</td>
-          <td class="p-2">${referral.commission}</td>
-        </tr>
-      `;
-    });
+                withdrawMessage.textContent = '';
+                withdrawMessage.style.color = 'red';
 
-    // Mock Data for Transaction Table
-    const transactions = [
-      { date: '2025-10-01', type: 'Deposit', amount: '$50.00', status: 'Completed' },
-      { date: '2025-10-02', type: 'Withdrawal', amount: '$20.00', status: 'Pending' },
-    ];
+                if (isNaN(amount) || amount <= 0) {
+                    withdrawMessage.textContent = 'Please enter a valid amount.';
+                    return;
+                }
 
-    // Populate Transaction Table
-    const transactionTable = document.getElementById('transaction-table');
-    transactions.forEach(transaction => {
-      transactionTable.innerHTML += `
-        <tr>
-          <td class="p-2">${transaction.date}</td>
-          <td class="p-2">${transaction.type}</td>
-          <td class="p-2">${transaction.amount}</td>
-          <td class="p-2">${transaction.status}</td>
-        </tr>
-      `;
-    });
+                if (amount > currentBalance) {
+                    withdrawMessage.textContent = 'Insufficient balance.';
+                    return;
+                }
 
-    // Mock Data for Ticket Table
-    const tickets = [
-      { title: 'Payment Issue', status: 'Open' },
-      { title: 'Account Verification', status: 'Closed' },
-    ];
+                if (paymentMethod === 'binance' && binancePayId.trim() === '') {
+                    withdrawMessage.textContent = 'Please enter your Binance Pay ID.';
+                    return;
+                }
 
-    // Populate Ticket Table
-    const ticketTable = document.getElementById('ticket-table');
-    tickets.forEach(ticket => {
-      ticketTable.innerHTML += `
-        <tr>
-          <td class="p-2">${ticket.title}</td>
-          <td class="p-2">${ticket.status}</td>
-        </tr>
-      `;
-    });
+                // Simulate a successful withdrawal
+                const newBalance = currentBalance - amount;
+                balanceSpan.textContent = newBalance.toFixed(2); // Update balance display
+                withdrawMessage.style.color = 'green';
+                withdrawMessage.textContent = `Successfully withdrew $${amount.toFixed(2)} via ${paymentMethod === 'binance' ? 'Binance Pay ID' : paymentMethod}.`;
 
-    // Copy Referral Link
-    function copyReferralLink() {
-      const link = document.querySelector('#referral input').value;
-      navigator.clipboard.writeText(link);
-      alert('Referral link copied!');
-    }
+                // Clear input fields
+                withdrawAmountInput.value = '';
+                binancePayidInputField.value = '';
 
-    // Earnings Chart
-    const ctx = document.getElementById('earnings-chart').getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['Oct 1', 'Oct 2', 'Oct 3', 'Oct 4', 'Oct 5'],
-        datasets: [{
-          label: 'Daily Earnings',
-          data: [10, 20, 15, 25, 30],
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59, 130, 246, 0.2)',
-          fill: true,
-        }],
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true,
-          },
-        },
-      },
-    });
-
-    // Show Dashboard by Default
-    showPage('dashboard');
-  </script>
+                // In a real application, this would send data to a server for processing.
+                console.log(`Withdrawal Request: Amount - $${amount}, Method - ${paymentMethod}, Binance Pay ID - ${binancePayId}`);
+            });
+        });
+    </script>
 </body>
 </html>
