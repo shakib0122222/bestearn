@@ -45,7 +45,7 @@
             width: 95%;
             max-width: 450px;
             margin: 0 auto;
-            padding: 80px 15px; /* Further increased top and bottom padding for larger vertical size */
+            padding: 15px;
             background-color: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -228,6 +228,33 @@
             font-size: 1.15em;
         }
 
+        .social-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .social-links a {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .social-links a:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .social-links a i {
+            font-size: 1.2em;
+        }
+
         .copy-all-btn {
             background: var(--primary-color);
             color: white;
@@ -293,7 +320,7 @@
         /* Media Queries for Mobile Friendliness */
         @media (max-width: 480px) {
             .container {
-                padding: 60px 12px; /* Further increased top and bottom padding for mobile */
+                padding: 12px;
                 width: 95%;
                 margin: 0 auto;
             }
@@ -350,6 +377,20 @@
 
             .result-item span {
                 font-size: 1.05em;
+            }
+
+            .social-links {
+                justify-content: flex-start;
+                width: 100%;
+            }
+
+            .social-links a {
+                padding: 6px 10px;
+                font-size: 0.9em;
+            }
+
+            .social-links a i {
+                font-size: 1em;
             }
 
             .copy-all-btn {
@@ -512,10 +553,22 @@
 
                     fields.forEach(field => {
                         if (data[field.key]) {
+                            let content = data[field.key];
+                            if (field.key === 'number') {
+                                const internationalNumber = data['international_format'] || `+88${data[field.key]}`;
+                                content = `
+                                    <span>${data[field.key]}</span>
+                                    <div class="social-links">
+                                        <a href="https://wa.me/${internationalNumber}" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                                        <a href="https://t.me/${internationalNumber}" target="_blank"><i class="fab fa-telegram-plane"></i> Telegram</a>
+                                        <a href="imo://msg/${internationalNumber}" target="_blank"><i class="fas fa-comment"></i> Imo</a>
+                                    </div>
+                                `;
+                            }
                             html += `
                                 <div class="result-item">
                                     <strong><i class="${field.icon}"></i> ${field.label}:</strong> 
-                                    <span>${data[field.key]}</span>
+                                    ${content}
                                 </div>
                             `;
                             copyText += `${field.label}: ${data[field.key]}\n`;
